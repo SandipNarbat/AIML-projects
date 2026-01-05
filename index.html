@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MonitAI Dashboard</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css"/>
+</head>
+
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">M</div>
+    <span class="brand-name">MonitAI</span>
+  </div>
+
+  <div class="top-actions">
+    <!-- <span class="material-icons">notifications</span> -->
+    <div class="avatar">S</div>
+  </div>
+</header>
+
+<main class="container">
+
+  <!-- PAGE HEADER -->
+  <section class="page-header">
+    <div>
+      <h1>Dashboard Overview</h1>
+      <p>Real-time monitoring of job execution and system health.</p>
+    </div>
+
+    <div class="header-actions">
+      <span class="pill online">● System Online</span>
+      <button class="btn">⟳ Refresh</button>
+    </div>
+  </section>
+
+  <!-- KPIs -->
+  <section>
+    <!-- <h2 class="section-title">KPIs</h2> -->
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <p>Total Jobs</p>
+        <h3>1,248 <span class="up">↑12%</span></h3>
+                <span class="material-icons blue">work_history</span>
+      </div>
+
+      <div class="kpi-card">
+        <p>Failures</p>
+        <h3>0 <span class="muted">Stable</span></h3>
+        <span class="material-icons red">error</span>
+      </div>
+
+      <div class="kpi-card">
+        <p>Anomalies</p>
+        <h3>2 <span class="warn">New</span></h3>
+        <span class="material-icons purple">warning</span>
+      </div>
+
+      <div class="kpi-card">
+        <p>Long Running</p>
+        <h3>5 <span class="danger">Action Needed</span></h3>
+        <span class="material-icons orange">timelapse</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- TABLES -->
+  <section class="grid-2">
+    <div class="card">
+      <div class="card-header">
+        <h3>Long Running Jobs</h3>
+        <!-- <a href="#">View All</a> -->
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>JOID</th><th>JOB</th><th>BASELINE</th><th>CURRENT</th><th>LAST SEEN</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>#4920</td><td>Data_Sync_Daily</td><td>45m</td><td class="warn">1h 20m</td><td>2m ago</td>
+          </tr>
+          <tr>
+            <td>#4918</td><td>Report_Gen_X</td><td>10m</td><td class="warn">35m</td><td>12m ago</td>
+          </tr>
+          <tr>
+            <td>#4890</td><td>ETL_Pipeline_V2</td><td>2h</td><td class="warn">3h 10m</td><td>45m ago</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h3>Recent Failures</h3>
+        <!-- <a href="#">View All</a> -->
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>JOID</th><th>JOB</th><th>FAILED AT</th><th>TYPE</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>#3201</td><td>API_Fetch_Orders</td><td>10:42 AM</td><td><span class="tag red">TRAACKED</span></td>
+          </tr>
+          <tr>
+            <td>#3198</td><td>Image_Process_B</td><td>09:15 AM</td><td><span class="tag red">UNTRACKED</span></td>
+          </tr>
+          <tr>
+            <td>#3155</td><td>Inventory_Check</td><td>08:00 AM</td><td><span class="tag red">TRACKED</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ANOMALIES -->
+  <section class="card">
+    <div class="card-header">
+      <h3>Anomalies Detected</h3>
+        <!-- <a href="#">View All</a> -->
+
+      <!-- <button class="btn small">Export CSV</button> -->
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>JOID</th><th>JOB</th><th>RUNTIME</th><th>PREDICTED</th><th>EXCEEDED BY</th><th>STATUS</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>#8821</td><td>Daily_Ledger_Finalize</td><td>4h 15m</td><td>2h 30m</td>
+          <td>
+            <div class="bar purple" style="width:70%"></div>
+            <span class="percent">+70%</span>
+          </td>
+          <td><span class="tag orange">minor</span></td>
+        </tr>
+        <tr>
+          <td>#8845</td><td>Cache_Invalidation_Global</td><td>45m</td><td>5m</td>
+          <td>
+            <div class="bar red" style="width:100%"></div>
+            <span class="percent red">+800%</span>
+          </td>
+          <td><span class="tag red">Critical</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+</main>
+
+<footer>
+  © 2023 MonitAI Systems. Version 2.4.1
+</footer>
+
+</body>
+</html>
