@@ -1,173 +1,211 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>MonitAI Dashboard</title>
-
-  <!-- Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-
-  <link rel="stylesheet" href="style.css"/>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Trickle Feed File Status</title>
+    <link rel="stylesheet" href="styles.css" />
 </head>
 
 <body>
+    <div class="container">
+        <h1>Trickle Feed File Status</h1>
 
-<header class="topbar">
-  <div class="brand">
-    <div class="logo">M</div>
-    <span class="brand-name">MonitAI</span>
-  </div>
+        <div class="search-box">
+            <input id="filename" placeholder="enter file name" />
+            <select id="region">
+                <option value="PR">PR</option>
+                <option value="NR" selected>NR</option>
+            </select>
+            <button type="button" onclick="checkFile()">Check</button>
+        </div>
+        <!-- <pre id="output"></pre> -->
+        <p id="errorMsg" style="color:red; display: none; margin-top: 8px;">File name required</p>
 
-  <div class="top-actions">
-    <!-- <span class="material-icons">notifications</span> -->
-    <div class="avatar">S</div>
-  </div>
-</header>
-
-<main class="container">
-
-  <!-- PAGE HEADER -->
-  <section class="page-header">
-    <div>
-      <h1>Dashboard Overview</h1>
-      <p>Real-time monitoring of job execution and system health.</p>
+        <div id="result-card" class="card-wrapper">
+            <div class="status_wrapper">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="file-info">
+                            <small>FILE IDENTITY</small>
+                            <h4 id="file"></h4>
+                        </div>
+                    </div>
+                    <section id="status">
+                    </section>
+                </div>
+                <div class="statuscode">
+                    <div id="donut" class="progress-wrapper">
+                        <svg width="100" height="100" viewbox="0 0 100 100">
+                            <circle cx="50" cy="50" r="42" stroke="#e5e7eb" stroke-width="8" fill="none" />
+                            <circle id="donut-progress" cx="50" cy="50" r="42" stroke="#22c55e" stroke-width="8"
+                                fill="none" stroke-linecap="round" stroke-dasharray="439.8" stroke-dashoffset="439.8"
+                                transform="rotate(-90 50 50)" />
+                        </svg>
+                        <div class="donut-center" id="progressCircle">
+                            <span id="progressText"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+    <script>
+        const STATUS_MAP = {
+            0: "File not picked yet.",
+            10: "start area creation.",
+            20: "File under process.",
+            30: "generating report.",
+            40: "File Processed and report generated..",
+        }
+        function getStatus(status_code) {
+            const STATUS_MAP = {
+                0: "File not picked yet.",
+                10: "start area creation.",
+                20: "File under process.",
+                30: "generating report.",
+                40: "File Processed and report generated.",
+            }
+            if (status_code > 90) return "File stuck";
+            return STATUS_MAP[status_code];
+        }
+        function setDonutProgress(value) {
+            let percent = 0;
+            color = "22c55e"
 
-    <div class="header-actions">
-      <span class="pill online">● System Online</span>
-      <button class="btn">⟳ Refresh</button>
-    </div>
-  </section>
+            if (value <= 10) {
+                percent = 25;
+            } else if (value <= 20) {
+                percent = 50;
+            } else if (value <= 30) {
+                percent = 75;
+            } else if (value <= 40) {
+                percent = 100;
+            } else if (value >= 40) {
+                percent = 100;
+                color = "red";
+            }
+            const circle = document.getElementById("donut-progress");
+            const valueText = document.getElementById("progressText");
 
-  <!-- KPIs -->
-  <section>
-    <!-- <h2 class="section-title">KPIs</h2> -->
+            const radius = 42;
+            const circumference = 2 * Math.PI * radius
+            const offset = circumference - (percent / 100) * circumference;
 
-    <div class="kpi-grid">
-      <div class="kpi-card">
-        <p>Total Jobs</p>
-        <h3>1,248 <span class="up">↑12%</span></h3>
-                <span class="material-icons blue">work_history</span>
-      </div>
+            circle.style.strokeDashoffset = offset;
+            circle.style.stroke = color;
+            valueText.textContent = `${value}%`;
+        }
+        async function checkFile(event) {
+            if (event) event.preventDefault();
+            const filename = document.getElementById("filename").value;
+            const region = document.getElementById("region").value;
+            console.log(region)
+            console.log(filename)
 
-      <div class="kpi-card">
-        <p>Failures</p>
-        <h3>0 <span class="muted">Stable</span></h3>
-        <span class="material-icons red">error</span>
-      </div>
 
-      <div class="kpi-card">
-        <p>Anomalies</p>
-        <h3>2 <span class="warn">New</span></h3>
-        <span class="material-icons purple">warning</span>
-      </div>
+            const res = await fetch("http://localhost:8000/check-file", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ filename, region })
 
-      <div class="kpi-card">
-        <p>Long Running</p>
-        <h3>5 <span class="danger">Action Needed</span></h3>
-        <span class="material-icons orange">timelapse</span>
-      </div>
-    </div>
-  </section>
+            });
+            const data = await res.json();
+            document.getElementById("result-card").style.display = "block";
+            document.getElementById("file").textContent = data.File_Name;
+            document.getElementById("progressText").textContent = data.Application.status;
+            const sec = document.getElementById("status");
+            sec.innerHTML = "";
 
-  <!-- TABLES -->
-  <section class="grid-2">
-    <div class="card">
-      <div class="card-header">
-        <h3>Long Running Jobs</h3>
-        <!-- <a href="#">View All</a> -->
-      </div>
+            // block containers
+            const gridBlock = document.createElement("div");   // top 2x2 grid
+            gridBlock.className = "status-grid";
 
-      <table>
-        <thead>
-          <tr>
-            <th>JOID</th><th>JOB</th><th>BASELINE</th><th>CURRENT</th><th>LAST SEEN</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>#4920</td><td>Data_Sync_Daily</td><td>45m</td><td class="warn">1h 20m</td><td>2m ago</td>
-          </tr>
-          <tr>
-            <td>#4918</td><td>Report_Gen_X</td><td>10m</td><td class="warn">35m</td><td>12m ago</td>
-          </tr>
-          <tr>
-            <td>#4890</td><td>ETL_Pipeline_V2</td><td>2h</td><td class="warn">3h 10m</td><td>45m ago</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+            const stackBlock = document.createElement("div");  // middle stacked
+            stackBlock.className = "status-stack";
 
-    <div class="card">
-      <div class="card-header">
-        <h3>Recent Failures</h3>
-        <!-- <a href="#">View All</a> -->
-      </div>
+            const reportBlock = document.createElement("div"); // bottom
+            reportBlock.className = "status-grid";
 
-      <table>
-        <thead>
-          <tr>
-            <th>JOID</th><th>JOB</th><th>FAILED AT</th><th>TYPE</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>#3201</td><td>API_Fetch_Orders</td><td>10:42 AM</td><td><span class="tag red">TRAACKED</span></td>
-          </tr>
-          <tr>
-            <td>#3198</td><td>Image_Process_B</td><td>09:15 AM</td><td><span class="tag red">UNTRACKED</span></td>
-          </tr>
-          <tr>
-            <td>#3155</td><td>Inventory_Check</td><td>08:00 AM</td><td><span class="tag red">TRACKED</span></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
 
-  <!-- ANOMALIES -->
-  <section class="card">
-    <div class="card-header">
-      <h3>Anomalies Detected</h3>
-        <!-- <a href="#">View All</a> -->
+            sec.appendChild(gridBlock);
+            sec.appendChild(stackBlock);
+            sec.appendChild(reportBlock);
 
-      <!-- <button class="btn small">Export CSV</button> -->
-    </div>
 
-    <table>
-      <thead>
-        <tr>
-          <th>JOID</th><th>JOB</th><th>RUNTIME</th><th>PREDICTED</th><th>EXCEEDED BY</th><th>STATUS</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>#8821</td><td>Daily_Ledger_Finalize</td><td>4h 15m</td><td>2h 30m</td>
-          <td>
-            <div class="bar purple" style="width:70%"></div>
-            <span class="percent">+70%</span>
-          </td>
-          <td><span class="tag orange">minor</span></td>
-        </tr>
-        <tr>
-          <td>#8845</td><td>Cache_Invalidation_Global</td><td>45m</td><td>5m</td>
-          <td>
-            <div class="bar red" style="width:100%"></div>
-            <span class="percent red">+800%</span>
-          </td>
-          <td><span class="tag red">Critical</span></td>
-        </tr>
-      </tbody>
-    </table>
-  </section>
+            function addRow(label, value) {
+                if (value === null || value === undefined || value === "") return;
+                if (Array.isArray(value) && value.length === 0) return;
 
-</main>
+                const p = document.createElement("p");
+                p.classList.add("status-row");
+                p.dataset.label = label.replace(/\s+/g, "-").toLowerCase();
 
-<footer>
-  © 2023 MonitAI Systems. Version 2.4.1
-</footer>
+                if (Array.isArray(value)) {
+                    p.innerHTML = `
+                        <strong>${label}:</strong>
+                        <ul class="status-list">
+                            ${value.map(item => `<li>${item}</li>`).join("")}
+                        </ul>
+                    `;
+                } else {
+                    p.innerHTML = `
+                        <strong>${label}:</strong>
+                        <span class="status-value">${value}</span>
+                    `;
+                }
 
+                // ── GRID ROUTING (no logic change) ──
+                if (
+                    label === "SFTP Status" ||
+                    label === "SFTP Processing Status" ||
+                    label === "Transfered To" ||
+                    label === "Transfered At"
+                ) {
+                    gridBlock.appendChild(p);
+                } 
+                else if (
+                    label === "Archival Path" ||
+                    label === "App Status"
+                ) {
+                    stackBlock.appendChild(p);
+                } 
+                else if (label === "Report Status" ||
+                    label === "Report details") {
+                    reportBlock.appendChild(p);
+                } 
+
+                else {
+                    stackBlock.appendChild(p); // fallback (Error etc.)
+                }
+            }
+
+
+            ;
+
+            addRow("SFTP Status", data.ftp?.sftp_status);
+            addRow("SFTP Processing Status", data.ftp?.procesing_status);
+            addRow("Transfered To", data.ftp?.transfered_status?.transfered_to);
+            addRow("Transfered At", data.ftp?.transfered_status?.transfered_at);
+            addRow("Archival Path", data.ftp?.Archival_path);
+            addRow("Failure Status", data.ftp?.failure_status);
+            const status_code = data.Application?.status;
+            if (status_code === null || status_code === undefined || status_code === "") {
+                document.getElementById("donut").style.display = "none";
+            } else {
+                document.getElementById("donut").style.display = "block";
+                setDonutProgress(status_code);
+            };
+            addRow("App Status", getStatus(status_code));
+            addRow("Report Status", data.Application?.Report_status);
+            addRow("Report details", data.Application?.Report_details);
+
+            if (data.Error) {
+                addRow("Error", data.Error)
+            }
+        }
+    </script>
 </body>
+
 </html>
