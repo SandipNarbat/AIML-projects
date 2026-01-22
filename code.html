@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Refined Status Dashboard with Report Path</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#3b82f6",
+                        "background-light": "#f8fafc",
+                        "background-dark": "#0f172a",
+                        "card-light": "#ffffff",
+                        "card-dark": "#1e293b",
+                    },
+                    fontFamily: {
+                        sans: ["Inter", "sans-serif"],
+                        mono: ["JetBrains Mono", "monospace"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.75rem",
+                    },
+                },
+            },
+        };
+        function toggleDarkMode() {
+            document.documentElement.classList.toggle('dark');
+        }
+    </script>
+<style type="text/tailwindcss">
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .status-ring {
+            transition: stroke-dashoffset 0.35s;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen font-sans transition-colors duration-200">
+<header class="border-b border-slate-200 dark:border-slate-800 bg-card-light dark:bg-card-dark sticky top-0 z-10">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="bg-primary p-2 rounded-lg">
+<span class="material-symbols-outlined text-white">dataset</span>
+</div>
+<h1 class="text-xl font-bold tracking-tight">Trickle Feed <span class="text-primary">Status</span></h1>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400" onclick="toggleDarkMode()">
+<span class="material-symbols-outlined dark:hidden">dark_mode</span>
+<span class="material-symbols-outlined hidden dark:block">light_mode</span>
+</button>
+<div class="h-8 w-[1px] bg-slate-200 dark:bg-slate-700"></div>
+<div class="flex items-center gap-2">
+<div class="text-right hidden sm:block">
+<p class="text-xs font-medium text-slate-500 dark:text-slate-400">System Admin</p>
+<p class="text-sm font-semibold">John Doe</p>
+</div>
+<div class="h-10 w-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center overflow-hidden">
+<span class="material-symbols-outlined text-slate-400">person</span>
+</div>
+</div>
+</div>
+</div>
+</header>
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<div class="mb-8">
+<div class="bg-card-light dark:bg-card-dark p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<form class="flex flex-col md:flex-row gap-4">
+<div class="flex-grow relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+<input class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm transition-all" placeholder="Enter file name (e.g. INI_14951...)" type="text"/>
+</div>
+<div class="flex gap-4">
+<div class="relative w-32">
+<select class="w-full pl-3 pr-10 py-3 bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg text-sm appearance-none focus:ring-2 focus:ring-primary">
+<option>NR</option>
+<option>SR</option>
+<option>WR</option>
+<option>ER</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">expand_more</span>
+</div>
+<button class="bg-primary hover:bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold text-sm transition-all shadow-lg shadow-primary/20 flex items-center gap-2 whitespace-nowrap" type="submit">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+                        Check Status
+                    </button>
+</div>
+</form>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<div class="lg:col-span-2 space-y-6">
+<div class="bg-card-light dark:bg-card-dark rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+<div class="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+<div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-primary mb-1 block">File Identity</span>
+<h2 class="text-lg font-mono font-bold text-slate-900 dark:text-white break-all">
+                            INI_14951_10012026_190514_10012026_087.txt
+                        </h2>
+</div>
+<span class="flex h-3 w-3 relative">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+</span>
+</div>
+<div class="p-6">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+<div class="space-y-1">
+<label class="text-xs font-medium text-slate-500 dark:text-slate-400 flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px]">cloud_sync</span>
+                                SFTP Status
+                            </label>
+<p class="text-sm font-semibold flex items-center gap-2">
+<span class="inline-block w-2 h-2 rounded-full bg-slate-400"></span>
+                                CLOSE
+                            </p>
+</div>
+<div class="space-y-1">
+<label class="text-xs font-medium text-slate-500 dark:text-slate-400 flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px]">hourglass_empty</span>
+                                Processing Status
+                            </label>
+<p class="text-sm font-semibold text-green-600 dark:text-green-400 flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+                                Processing Completed
+                            </p>
+</div>
+<div class="space-y-1">
+<label class="text-xs font-medium text-slate-500 dark:text-slate-400 flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px]">send</span>
+                                Transferred To
+                            </label>
+<p class="text-sm font-mono bg-slate-50 dark:bg-slate-900/50 p-1.5 rounded border border-slate-100 dark:border-slate-800">
+                                sbib24s2
+                            </p>
+</div>
+<div class="space-y-1">
+<label class="text-xs font-medium text-slate-500 dark:text-slate-400 flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px]">folder_shared</span>
+                                Transferred At
+                            </label>
+<p class="text-xs font-mono text-slate-600 dark:text-slate-400 break-all bg-slate-50 dark:bg-slate-900/50 p-1.5 rounded border border-slate-100 dark:border-slate-800">
+                                /fns/id/r/spool/Interfaces/BATCH-UPLOADS-TEMP
+                            </p>
+</div>
+<div class="md:col-span-2 space-y-1">
+<label class="text-xs font-medium text-slate-500 dark:text-slate-400 flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px]">inventory_2</span>
+                                Archival Path
+                            </label>
+<p class="text-xs font-mono text-slate-600 dark:text-slate-400 break-all bg-slate-50 dark:bg-slate-900/50 p-1.5 rounded border border-slate-100 dark:border-slate-800">
+                                /archives/sbib24/BATCH-UPLOADS-S2/20260110
+                            </p>
+</div>
+<div class="md:col-span-2 space-y-1">
+<label class="text-xs font-medium text-slate-500 dark:text-slate-400 flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px]">analytics</span>
+                                App Status
+                            </label>
+<div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-100 dark:border-blue-800/50">
+<p class="text-sm text-blue-800 dark:text-blue-300 font-medium">
+                                    File Processed and report generated.
+                                </p>
+</div>
+</div>
+<div class="md:col-span-2 flex flex-col md:flex-row gap-8 pt-4 border-t border-slate-100 dark:border-slate-800/50">
+<div class="flex-1 space-y-3">
+<label class="text-xs font-medium text-slate-500 dark:text-slate-400 flex items-center gap-2 uppercase tracking-wider">
+<span class="material-symbols-outlined text-[14px]">description</span>
+                                    Report Status
+                                </label>
+<ul class="space-y-2">
+<li class="flex items-center gap-3 text-sm text-slate-700 dark:text-slate-300">
+<span class="material-symbols-outlined text-green-500 text-[18px]">check_circle</span>
+                                        Report generated
+                                    </li>
+<li class="flex items-center gap-3 text-sm text-slate-700 dark:text-slate-300">
+<span class="material-symbols-outlined text-green-500 text-[18px]">check_circle</span>
+                                        Extraction file generated
+                                    </li>
+</ul>
+</div>
+<div class="flex-1 space-y-3">
+<label class="text-xs font-medium text-slate-500 dark:text-slate-400 flex items-center gap-2 uppercase tracking-wider">
+<span class="material-symbols-outlined text-[14px]">assignment_turned_in</span>
+                                    Report Details
+                                </label>
+<div class="bg-slate-50 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/50 rounded-xl p-3">
+<table class="w-full text-sm">
+<tbody class="divide-y divide-slate-200/50 dark:divide-slate-800/50">
+<tr class="group">
+<td class="py-1.5 text-slate-500 dark:text-slate-400">Total TXT Count</td>
+<td class="py-1.5 text-right font-bold text-slate-900 dark:text-white font-mono">136</td>
+</tr>
+<tr class="group">
+<td class="py-1.5 text-slate-500 dark:text-slate-400">Total TXT Amount</td>
+<td class="py-1.5 text-right font-bold text-primary dark:text-primary font-mono text-[15px]">453467.0</td>
+</tr>
+<tr class="group">
+<td class="py-1.5 text-slate-500 dark:text-slate-400">Delivered At</td>
+<td class="py-1.5 text-right font-semibold text-slate-700 dark:text-slate-300 text-xs">2026-01-21 Wed 12:15:12</td>
+</tr>
+<tr class="group">
+<td class="py-1.5 text-slate-500 dark:text-slate-400">Delivered To</td>
+<td class="py-1.5 text-right font-bold text-slate-900 dark:text-white font-mono text-xs">/CFTM/responses</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="space-y-8">
+<div class="bg-card-light dark:bg-card-dark p-8 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col items-center justify-center text-center">
+<h3 class="text-sm font-semibold text-slate-500 dark:text-slate-400 mb-6 uppercase tracking-widest">Overall Status</h3>
+<div class="relative flex items-center justify-center">
+<svg class="w-48 h-48">
+<circle class="text-slate-100 dark:text-slate-800 stroke-current" cx="96" cy="96" fill="transparent" r="80" stroke-width="8"></circle>
+<circle class="text-green-500 stroke-current status-ring" cx="96" cy="96" fill="transparent" r="80" stroke-dasharray="502.6" stroke-dashoffset="301.5" stroke-linecap="round" stroke-width="10"></circle>
+</svg>
+<div class="absolute flex flex-col items-center">
+<span class="text-5xl font-black text-slate-900 dark:text-white">40</span>
+<span class="text-xs font-bold text-slate-400 uppercase tracking-widest">status code</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<footer class="mt-12 py-8 border-t border-slate-200 dark:border-slate-800 text-center">
+<p class="text-sm text-slate-400 dark:text-slate-500">
+        © 2024 Enterprise Trickle Feed Management System. Internal Use Only.
+    </p>
+</footer>
+
+</body></html>
