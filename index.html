@@ -3,209 +3,170 @@
 
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Trickle Feed File Status</title>
-    <link rel="stylesheet" href="styles.css" />
+    <title>Realtime Queue Monitor</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet">
 </head>
 
 <body>
-    <div class="container">
-        <h1>Trickle Feed File Status</h1>
 
-        <div class="search-box">
-            <input id="filename" placeholder="enter file name" />
-            <select id="region">
-                <option value="PR">PR</option>
-                <option value="NR" selected>NR</option>
-            </select>
-            <button type="button" onclick="checkFile()">Check</button>
-        </div>
-        <!-- <pre id="output"></pre> -->
-        <p id="errorMsg" style="color:red; display: none; margin-top: 8px;">File name required</p>
+    <h2>📊 Realtime Queue Buildup Monitor</h2>
+    <div class="table-container">
+        <table id="queueTable">
+            <thead>
+                <tr id="headerRow">
+                    <th>Queue</th>
+                    <th>M</th>
+                    <th>S1</th>
+                    <th>s2</th>
+                    <th>s3</th>
+                    <th>s4</th>
+                    <th>s5</th>
+                    <th>s6</th>
+                    <th>s7</th>
+                    <th>s8</th>
+                    <th>s9</th>
+                    <th>s10</th>
+                    <th>s11</th>
+                    <th>s12</th>
+                    <th>s13</th>
+                    <th>s14</th>
 
-        <div id="result-card" class="card-wrapper">
-            <div class="status_wrapper">
-                <div class="card">
-                    <div class="card-header">
-                        <div class="file-info">
-                            <small>FILE IDENTITY</small>
-                            <h4 id="file"></h4>
-                        </div>
-                    </div>
-                    <section id="status">
-                    </section>
-                </div>
-                <div class="statuscode">
-                    <div id="donut" class="progress-wrapper">
-                        <svg width="100" height="100" viewbox="0 0 100 100">
-                            <circle cx="50" cy="50" r="42" stroke="#e5e7eb" stroke-width="8" fill="none" />
-                            <circle id="donut-progress" cx="50" cy="50" r="42" stroke="#22c55e" stroke-width="8"
-                                fill="none" stroke-linecap="round" stroke-dasharray="439.8" stroke-dashoffset="439.8"
-                                transform="rotate(-90 50 50)" />
-                        </svg>
-                        <div class="donut-center" id="progressCircle">
-                            <span id="progressText"></span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
     </div>
+
     <script>
-        const STATUS_MAP = {
-            0: "File not picked yet.",
-            10: "start area creation.",
-            20: "File under process.",
-            30: "generating report.",
-            40: "File Processed and report generated..",
-        }
-        function getStatus(status_code) {
-            const STATUS_MAP = {
-                0: "File not picked yet.",
-                10: "start area creation.",
-                20: "File under process.",
-                30: "generating report.",
-                40: "File Processed and report generated.",
-            }
-            if (status_code > 90) return "File stuck";
-            return STATUS_MAP[status_code];
-        }
-        function setDonutProgress(value) {
-            let percent = 0;
-            color = "22c55e"
+        const tableBody = document.getElementById("tableBody");
+        const headerRow = document.getElementById("headerRow");
 
-            if (value <= 10) {
-                percent = 25;
-            } else if (value <= 20) {
-                percent = 50;
-            } else if (value <= 30) {
-                percent = 75;
-            } else if (value <= 40) {
-                percent = 100;
-            } else if (value >= 40) {
-                percent = 100;
-                color = "red";
-            }
-            const circle = document.getElementById("donut-progress");
-            const valueText = document.getElementById("progressText");
+        // In-memory state
+        const state = {};
 
-            const radius = 42;
-            const circumference = 2 * Math.PI * radius
-            const offset = circumference - (percent / 100) * circumference;
+        // --------------------------------------------------
+        // Build table from SNAPSHOT
+        // --------------------------------------------------
+        function renderSnapshot(snapshot) {
+            tableBody.innerHTML = "";
+            // headerRow.innerHTML = "<th>Queue</th>";
 
-            circle.style.strokeDashoffset = offset;
-            circle.style.stroke = color;
-            valueText.textContent = `${value}%`;
-        }
-        async function checkFile(event) {
-            if (event) event.preventDefault();
-            const filename = document.getElementById("filename").value;
-            const region = document.getElementById("region").value;
-            console.log(region)
-            console.log(filename)
+            const queues = Object.keys(snapshot);
+            if (queues.length === 0) return;
 
+            const metricCount = snapshot[queues[0]].length;
 
-            const res = await fetch("http://localhost:8000/check-file", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ filename, region })
+            // Build header
+            // for (let i = 0; i < metricCount; i++) {
+            //     const th = document.createElement("th");
+            //     th.textContent = `M${i + 1}`;
+            //     headerRow.appendChild(th);
+            // }
 
+            // Build rows
+            queues.forEach(queue => {
+                state[queue] = snapshot[queue];
+
+                const tr = document.createElement("tr");
+                tr.id = `row-${queue}`;
+
+                // Queue name
+                const th = document.createElement("th");
+                th.textContent = queue;
+                tr.appendChild(th);
+
+                snapshot[queue].forEach((val, i) => {
+                    const td = document.createElement("td");
+                    td.id = `cell-${queue}-${i}`;
+
+                    // 🔹 CREATE SPAN
+                    const span = document.createElement("span");
+                    span.className = "cell-value";
+                    span.id = `cell-value-${queue}-${i}`;
+
+                    applyCellStyle(span, val); // style the span, not td
+
+                    td.appendChild(span);
+                    tr.appendChild(td);
+                });
+
+                tableBody.appendChild(tr);
             });
-            const data = await res.json();
-            document.getElementById("result-card").style.display = "block";
-            document.getElementById("file").textContent = data.File_Name;
-            document.getElementById("progressText").textContent = data.Application.status;
-            const sec = document.getElementById("status");
-            sec.innerHTML = "";
-
-            // block containers
-            const gridBlock = document.createElement("div");   // top 2x2 grid
-            gridBlock.className = "status-grid";
-
-            const stackBlock = document.createElement("div");  // middle stacked
-            stackBlock.className = "status-stack";
-
-            const reportBlock = document.createElement("div"); // bottom
-            reportBlock.className = "status-grid";
+        }
 
 
-            sec.appendChild(gridBlock);
-            sec.appendChild(stackBlock);
-            sec.appendChild(reportBlock);
+        // --------------------------------------------------
+        // Apply delta updates
+        // --------------------------------------------------
+        function applyDelta(delta) {
+            const queue = delta.queue;
+            if (!state[queue]) return;
+
+            delta.changes.forEach(change => {
+                const { index, new: newVal } = change;
+
+                state[queue][index] = newVal;
+
+                const span = document.getElementById(
+                    `cell-value-${queue}-${index}`
+                );
+                if (!span) return;
+
+                applyCellStyle(span, newVal);
+
+                span.classList.add("updated");
+                setTimeout(() => span.classList.remove("updated"), 600);
+            });
+        }
 
 
-            function addRow(label, value) {
-                if (value === null || value === undefined || value === "") return;
-                if (Array.isArray(value) && value.length === 0) return;
+        // --------------------------------------------------
+        // Styling logic
+        // --------------------------------------------------
+        function applyCellStyle(el, value) {
+            el.className = "cell-value"; // reset
 
-                const p = document.createElement("p");
-                p.classList.add("status-row");
-                p.dataset.label = label.replace(/\s+/g, "-").toLowerCase();
-
-                if (Array.isArray(value)) {
-                    p.innerHTML = `
-                        <strong>${label}:</strong>
-                        <ul class="status-list">
-                            ${value.map(item => `<li>${item}</li>`).join("")}
-                        </ul>
-                    `;
-                } else {
-                    p.innerHTML = `
-                        <strong>${label}:</strong>
-                        <span class="status-value">${value}</span>
-                    `;
-                }
-
-                // ── GRID ROUTING (no logic change) ──
-                if (
-                    label === "SFTP Status" ||
-                    label === "SFTP Processing Status" ||
-                    label === "Transfered To" ||
-                    label === "Transfered At"
-                ) {
-                    gridBlock.appendChild(p);
-                } 
-                else if (
-                    label === "Archival Path" ||
-                    label === "App Status"
-                ) {
-                    stackBlock.appendChild(p);
-                } 
-                else if (label === "Report Status" ||
-                    label === "Report details") {
-                    reportBlock.appendChild(p);
-                } 
-
-                else {
-                    stackBlock.appendChild(p); // fallback (Error etc.)
-                }
+            if (value === 0) {
+                el.textContent = "0";
+                el.classList.add("ok");
             }
-
-
-            ;
-
-            addRow("SFTP Status", data.ftp?.sftp_status);
-            addRow("SFTP Processing Status", data.ftp?.procesing_status);
-            addRow("Transfered To", data.ftp?.transfered_status?.transfered_to);
-            addRow("Transfered At", data.ftp?.transfered_status?.transfered_at);
-            addRow("Archival Path", data.ftp?.Archival_path);
-            addRow("Failure Status", data.ftp?.failure_status);
-            const status_code = data.Application?.status;
-            if (status_code === null || status_code === undefined || status_code === "") {
-                document.getElementById("donut").style.display = "none";
-            } else {
-                document.getElementById("donut").style.display = "block";
-                setDonutProgress(status_code);
-            };
-            addRow("App Status", getStatus(status_code));
-            addRow("Report Status", data.Application?.Report_status);
-            addRow("Report details", data.Application?.Report_details);
-
-            if (data.Error) {
-                addRow("Error", data.Error)
+            else if (value <= -1) {
+                el.innerHTML = `
+                    <span class="material-icons">thumb_down</span>
+                    `;
+                el.classList.add("warning");
+            }
+            else {
+                el.textContent = value;
+                el.classList.add("critical");
             }
         }
+
+
+        // --------------------------------------------------
+        // SSE Connection
+        // --------------------------------------------------
+        const es = new EventSource("http://localhost:8000/events");
+
+        es.addEventListener("snapshot", e => {
+            const snapshot = JSON.parse(e.data);
+            console.log("Snapshot received", snapshot);
+            renderSnapshot(snapshot);
+        });
+
+        es.addEventListener("delta", e => {
+            const delta = JSON.parse(e.data);
+            console.log("Delta received", delta);
+            applyDelta(delta);
+        });
+
+        es.onerror = () => {
+            console.error("SSE connection lost");
+        };
     </script>
+
 </body>
 
 </html>
